@@ -6,8 +6,9 @@ With this in mind, and also to improve my golang skills, I decided to create eas
 
 ## TODO list
 * [x] Create a cli
-* [ ] Create a template command that returns a valid envoy configuration
-* [ ] Add the possibility of adding allowed hosts
+* [ ] Read about the proxy protocol to understand what needs to be 
+* [ ] Start accepting a simple HTTP proxy request
+* [ ] Enable setting allowed hosts
 * [ ] Add the possibility to add basic auth
 * [ ] Create a run command that creates a template with the options and spins up an envoy
 * [ ] (?) Try to create a test with it to check if it can be used properly and think about this requirement 
