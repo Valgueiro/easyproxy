@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 	"slices"
 	"sort"
@@ -29,19 +30,17 @@ func Test_MergeHeaders(t *testing.T) {
 	result := MergeHeaders(a, b)
 
 	// When a key is only in one side, it should get the value from that side
-	expected := a[http.CanonicalHeaderKey("bla")]
-	if diff := cmp.Diff(result[http.CanonicalHeaderKey("bla")], expected); diff != "" {
+	if diff := cmp.Diff(result.Get("bla"), a.Get("bla")); diff != "" {
 		t.Error(diff)
 	}
 
-	expected = b[http.CanonicalHeaderKey("foo")]
-	if diff := cmp.Diff(result[http.CanonicalHeaderKey("foo")], expected); diff != "" {
+	if diff := cmp.Diff(result.Get("foo"), b.Get("foo")); diff != "" {
 		t.Error(diff)
 	}
 
 	// it should merge when the key is on both sides
-	expected = append(a[http.CanonicalHeaderKey("duplicated")], b[http.CanonicalHeaderKey("duplicated")]...)
-	if diff := cmp.Diff(result[http.CanonicalHeaderKey("duplicated")], expected, sortedStrings); diff != "" {
+	expected := fmt.Sprintf("%s%s", a.Get("duplicated"), b.Get("duplicated"))
+	if diff := cmp.Diff(result.Get("duplicated"), expected, sortedStrings); diff != "" {
 		t.Error(diff)
 	}
 
@@ -52,17 +51,17 @@ func Test_MergeHeaders(t *testing.T) {
 		keys = append(keys, k)
 	}
 
-	expected = make([]string, 0)
+	expected2 := make([]string, 0)
 	for k := range a {
-		expected = append(expected, k)
+		expected2 = append(expected2, k)
 	}
 	for k := range b {
-		if !slices.Contains(expected, k) {
-			expected = append(expected, k)
+		if !slices.Contains(expected2, k) {
+			expected2 = append(expected2, k)
 		}
 	}
 
-	if diff := cmp.Diff(keys, expected, sortedStrings); diff != "" {
+	if diff := cmp.Diff(keys, expected2, sortedStrings); diff != "" {
 		t.Error(diff)
 	}
 }
