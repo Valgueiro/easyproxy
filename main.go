@@ -1,9 +1,11 @@
 package main
 
 import (
-	"easyproxy/cmd"
+	"easyproxy/pkg/server"
 )
 
 func main() {
-  cmd.Execute()
+//   cmd.Execute()
+	s := server.New()
+	s.Run()
 }
