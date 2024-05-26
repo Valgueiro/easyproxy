@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"easyproxy/pkg/utils"
 )
@@ -70,12 +71,23 @@ func (s *Server) buildProxiedResponse(r *http.Response, rw http.ResponseWriter) 
 	return r.Body.Close()
 }
 
+func (s *Server) getResponse(r *http.Request) (*http.Response, error) {
+	req, err := http.NewRequest(r.Method, r.URL.String(), r.Body)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	return s.client.Do(req)
+
+}
+
 func (s *Server) proxy(w http.ResponseWriter, r *http.Request) {
-	response, err := s.client.Get(r.URL.String())
+	startTime := time.Now()
+	response, err := s.getResponse(r)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
 
 	err = s.checkResponse(response)
@@ -89,6 +101,8 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	generateAccessLog(r, startTime)
 }
 
 func (s *Server) Run() {
