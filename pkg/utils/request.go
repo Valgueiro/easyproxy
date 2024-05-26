@@ -1,41 +1,21 @@
 package utils
 
-import (
-	"fmt"
-	"io"
-	"log"
-	"net/http"
-)
+import "net/http"
 
+func MergeHeaders(a http.Header, b http.Header) http.Header {
+	o := http.Header{}
 
-func CopyResponseToResponseWriter(r *http.Response, rw http.ResponseWriter) error {
-	// Need to copy the request data from http.Response to http.ResponseWriter
-	// Check if the response is nil
-	if r == nil {
-		log.Println("r nil")
-		return fmt.Errorf("response is nil")
+	for key, value := range a {
+		o[key] = value
 	}
 
-	// Check if the response body is nil
-	if r.Body == nil {
-		log.Println("r body")
-		return fmt.Errorf("response body is nil")
-	}
-	
-	// copy status code
-	rw.WriteHeader(r.StatusCode)
-
-	// copy headers
-	for key, values := range r.Header {
-		for _, v := range values {
-			rw.Header().Add(key, v)
+	for key, value := range b {
+		if aVal, ok := o[key]; ok {
+			o[key] = append(aVal, value...)
+		} else {
+			o[key] = value
 		}
 	}
-	buf := make([]byte, 8)
-    if _, err := io.CopyBuffer(rw, r.Body, buf); err != nil {
-        // handle the error
-        return err
-    }
 
-	return r.Body.Close()
+	return o
 }
